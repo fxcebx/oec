@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, g, request, current_app, \
                     session, redirect, url_for, flash, abort, jsonify, \
                     get_flashed_messages, Response
-from flask.ext.babel import gettext
+from flask_babel import gettext
 
 import oec
 from oec.db_attr.models import Country, Country_name, Sitc, Sitc_name
@@ -34,7 +34,7 @@ def before_request():
     g.supported_langs = current_app.config.get('LANGUAGES')
     g.supported_langs = sorted(g.supported_langs.iteritems(), key=lambda x: x[1].lower())
     g.available_years = available_years
-    g.cache_version = 6
+    g.cache_version = 20
     g.translations = json.dumps(get_translations())
 
     # Save variable in session so we can determine if this is the user's
@@ -102,7 +102,7 @@ def page_not_found(e):
 # General views
 # ---------------------------
 @mod.route('/')
-@mod.route('<any("ar","de","el","en","es","fr","he","hi","it","ja","ko","mn","nl","ru","pt","tr","zh"):lang>/')
+@mod.route('<any("ar","de","el","en","es","fr","he","hi","it","ja","ko","mn","nl","ru","pt","tr","vi","zh"):lang>/')
 def home(lang=None):
     if not lang:
         return redirect(url_for('.home', lang='en'))
@@ -135,9 +135,27 @@ def publications():
     g.page_type = "publications"
     return render_template("general/publications.html")
 
+@mod.route('explore/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/')
+@mod.route('explore/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/<year:year>/')
+def explore_legacy_redir(app_name, classification, trade_flow, origin_id, dest_id, prod_id, year=None):
+    redirect_url = url_for('visualize.visualize', lang=g.locale, app_name=app_name, \
+                    classification=classification, trade_flow=trade_flow, \
+                    origin_id=origin_id, dest_id=dest_id, prod_id=prod_id, \
+                    year=year)
+    return redirect(redirect_url)
+
+@mod.route('explore/embed/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/')
+@mod.route('explore/embed/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/<year:year>/')
+def embed_legacy_redir(app_name, classification, trade_flow, origin_id, dest_id, \
+                prod_id, year=available_years['hs92'][-1]):
+    return redirect(url_for('visualize.embed', lang=g.locale, app_name=app_name, \
+                        classification=classification, trade_flow=trade_flow, \
+                        origin_id=origin_id, dest_id=dest_id, prod_id=prod_id, \
+                        year=year))
+
 @mod.route('<lang>/explore/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/')
 @mod.route('<lang>/explore/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/<year:year>/')
-def explore_legacy_redir(lang, app_name, classification, trade_flow, origin_id, dest_id, prod_id, year=None):
+def explore_lang_legacy_redir(lang, app_name, classification, trade_flow, origin_id, dest_id, prod_id, year=None):
     redirect_url = url_for('visualize.visualize', lang=lang, app_name=app_name, \
                     classification=classification, trade_flow=trade_flow, \
                     origin_id=origin_id, dest_id=dest_id, prod_id=prod_id, \
@@ -146,7 +164,7 @@ def explore_legacy_redir(lang, app_name, classification, trade_flow, origin_id, 
 
 @mod.route('<lang>/explore/embed/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/')
 @mod.route('<lang>/explore/embed/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/<year:year>/')
-def embed_legacy_redir(lang, app_name, classification, trade_flow, origin_id, dest_id, \
+def embed_lang_legacy_redir(lang, app_name, classification, trade_flow, origin_id, dest_id, \
                 prod_id, year=available_years['hs92'][-1]):
     return redirect(url_for('visualize.embed', lang=lang, app_name=app_name, \
                         classification=classification, trade_flow=trade_flow, \
@@ -156,33 +174,31 @@ def embed_legacy_redir(lang, app_name, classification, trade_flow, origin_id, de
 @mod.route('embed/<app_name>/<trade_flow>/<origin>/<dest>/<product>/')
 @mod.route('embed/<app_name>/<trade_flow>/<origin>/<dest>/<product>/<year>/')
 def embed_legacy(app_name, trade_flow, origin, dest, product, year=2012):
-    c = 'sitc' if int(year) < 1995 else 'hs'
+    c = 'sitc' if int(year) < 1995 else 'hs92'
     if product != "show" and product != "all":
-        prod = Hs.query.filter_by(hs=product).first()
-        c = 'hs'
+        prod = Hs92.query.filter_by(hs92=product).first()
+        c = 'hs92'
         if not prod:
             c = 'sitc'
             prod = Sitc.query.filter_by(sitc=product).first()
-        product = prod.id
+        product = prod.get_display_id()
     lang = request.args.get('lang', g.locale)
-    redirect_url = url_for('explore.embed', lang=g.locale, app_name=app_name, \
+    redirect_url = url_for('visualize.embed', lang=g.locale, app_name=app_name, \
                 classification=c, trade_flow=trade_flow, origin_id=origin, \
-                dest_id=dest, prod_id=product, year=year)
+                dest_id=dest, prod_id=product, year=[year])
     return redirect(redirect_url+"?controls=false")
 
 @mod.route('country/<country_id>/')
 def profile_country_legacy(country_id):
-    return redirect(url_for('profile.profile_country', attr_id=country_id))
+    return redirect(url_for('profile.profile_country', lang=g.locale, attr_id=country_id))
 
 @mod.route('hs4/<hs_id>/')
 def profile_hs_legacy(hs_id):
-    return redirect(url_for('profile.profile_product', attr_type="hs", \
-                attr_id=hs_id))
+    return redirect(url_for('profile.profile_product', lang=g.locale, attr_type="hs92", attr_id=hs_id))
 
 @mod.route('sitc4/<sitc_id>/')
 def profile_sitc_legacy(sitc_id):
-    return redirect(url_for('profile.profile_product', attr_type="sitc", \
-                attr_id=sitc_id))
+    return redirect(url_for('profile.profile_product', lang=g.locale, attr_type="sitc", attr_id=sitc_id))
 
 ###############################
 # Handle shortened URLs

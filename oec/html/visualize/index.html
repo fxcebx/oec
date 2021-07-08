@@ -12,14 +12,14 @@
     <!-- Twitter "photo card" -->
     <meta name="twitter:card" content="photo">
     <meta name="twitter:title" content="{{ current_build.title()|striptags|safe }}">
-    <meta name="twitter:image:src" content="http://atlas.media.mit.edu/static/generated/{{ g.locale }}_{{ request.path.split('/')[1:-1]|join('_') }}.png">
-    <meta name="twitter:domain" content="atlas.media.mit.edu">
-    <meta name="twitter:url" content="http://atlas.media.mit.edu{{ request.path }}{% if g.locale != 'en' %}?lang={{ g.locale }}{% endif %}">
+    <meta name="twitter:image:src" content="https://oec.world/static/generated/{{ g.locale }}_{{ request.path.split('/')[1:-1]|join('_') }}.png">
+    <meta name="twitter:domain" content="oec.world">
+    <meta name="twitter:url" content="https://oec.world{{ request.path }}{% if g.locale != 'en' %}?lang={{ g.locale }}{% endif %}">
 
     <!-- Facebook Properties -->
-    <meta property="og:image" content="http://atlas.media.mit.edu/static/generated/{{ g.locale }}_{{ request.path.split('/')[1:-1]|join('_') }}.png" />
+    <meta property="og:image" content="https://oec.world/static/generated/{{ g.locale }}_{{ request.path.split('/')[1:-1]|join('_') }}.png" />
     <meta property="og:title" content="{{ current_build.title()|striptags|safe }}">
-    <meta property="og:url" content="http://atlas.media.mit.edu{{ request.path }}{% if g.locale != 'en' %}?lang={{ g.locale }}{% endif %}">
+    <meta property="og:url" content="https://oec.world{{ request.path }}{% if g.locale != 'en' %}?lang={{ g.locale }}{% endif %}">
     <meta property="og:site_name" content="The Observatory of Economic Complexity"/>
     <meta property="og:type" content="website" />
 {% endblock %}
@@ -49,11 +49,10 @@
 
   {% macro build_list(builds) %}
     {% set a = builds[0].viz.slug %}
-    {% set pre_cat = "init" %}
     <div class="app_menu{% if a == current_app %} open{% endif %}" data-app="{{ a }}">
     {% for build in builds %}
-      {% if pre_cat != build.category() %}
-        {% if pre_cat != "init" %}</div></div>{% endif %}
+      {% if loop.index == 1 or builds[loop.index0 - 1].category() != build.category() %}
+        {% if loop.index != 1 %}</div></div>{% endif %}
         <div class="build">
         {% if build.category() != None %}
           <div class="build_title">{{ build.category() }}</div>
@@ -61,7 +60,6 @@
         <div class="build_list">
       {% endif %}
 
-      {% set pre_cat = build.category() %}
       {% set build_url = build.url() %}
       <a class="build_link{% if build_url == current_url %} active{% endif %}" href="/{{ g.locale }}/visualize/{{ build_url }}">{{ build.short_name() }}</a>
     {% endfor %}
@@ -70,7 +68,7 @@
 
   {% set app = None %}
   {% for builds in all_builds %}
-    {% if app == None %}<div class="app_button_group">{% endif %}
+    {% if loop.index % 2 == 1 %}<div class="app_button_group">{% endif %}
     {% set app = builds[0].viz.slug %}
     <div class="{{ app }} app_button{% if app == current_app %} open{% endif %}" data-app="{{ app }}">
       <img src="/static/img/icons/app/app_{{ app }}.png">{{ builds[0].viz.name }}
@@ -81,7 +79,6 @@
       {{ build_list(all_builds[loop.index0 - 1]) }}
       {% endif %}
       {{ build_list(builds) }}
-    {% set app = None %}
     {% endif %}
   {% endfor %}
 
@@ -132,7 +129,7 @@
 <content data-step="12" id="main_viz">
   <section class="nav-section">
 
-    {% if current_build.viz.slug != "stacked" and current_build.viz.slug != "line" and current_build.year_str|int > g.available_years['sitc'][0] %}
+    {% if current_build.viz.slug != "stacked" and current_build.viz.slug != "line" and current_build.year_str|int > g.available_years[current_build.classification][0] %}
     <aside>
       <a id="prev" href="/{{ g.locale }}/visualize/{{ current_build.url(year=current_build.year_str|int-1) }}">
         <h2 class="year-nav">
@@ -147,7 +144,7 @@
       <h1>{{ current_build.question()|safe }}</h1>
     </content>
 
-    {% if current_build.viz.slug != "stacked" and current_build.viz.slug != "line" and current_build.year_str|int < g.available_years['sitc'][-1] %}
+    {% if current_build.viz.slug != "stacked" and current_build.viz.slug != "line" and current_build.year_str|int < g.available_years[current_build.classification][-1] %}
     <aside>
       <a id="next" href="/{{ g.locale }}/visualize/{{ current_build.url(year=current_build.year_str|int+1) }}">
         <h2 class="year-nav">
@@ -202,6 +199,7 @@
     same_origin = window.parent.location.host == window.location.host;
     in_the_wild = (window.parent.location.origin && window.parent.location.origin.indexOf("atlas.media.mit.edu") < 0) &&
                   (window.parent.location.origin && window.parent.location.origin.indexOf("oec.media.mit.edu") < 0) &&
+                  (window.parent.location.origin && window.parent.location.origin.indexOf("oec.world") < 0) &&
                   (window.parent.location.origin && window.parent.location.origin.indexOf("localhost") < 0);
     // in_explore_page = (window.location != window.parent.location) && !in_the_wild && (window.parent.location.pathname.indexOf("explore") >= 0 || window.parent.location.pathname.indexOf("profile") >= 0);
     in_explore_page = (window.location != window.parent.location) && !in_the_wild && (window.parent.location.pathname.indexOf("explore") >= 0);
@@ -242,15 +240,6 @@
       origin = originOption.getAttribute("data-display_id")
     }
 
-    if(d3.select("#destination select").node()){
-      var destSelect = d3.select("#destination select").node()
-        , destOption = destSelect.options[destSelect.selectedIndex]
-      dest = destOption.getAttribute("data-display_id")
-    }
-    else if (d3.select("#origin select").node() && tf !== "eci" && tf !== "show") {
-      dest = "show";
-    }
-
     if(d3.select("#classification select").node()){
       classification = d3.select("#classification select").node().value.toLowerCase()
     }
@@ -267,6 +256,18 @@
       else {
         prod = prodOption.getAttribute("data-display_id")
       }
+    }
+
+    if(d3.select("#destination select").node()){
+      var destSelect = d3.select("#destination select").node()
+        , destOption = destSelect.options[destSelect.selectedIndex]
+      var new_dest = destOption.getAttribute("data-display_id")
+      if (new_dest !== "all") {
+        dest = new_dest;
+      }
+    }
+    else if (d3.select("#origin select").node() && tf !== "eci" && tf !== "show" && prod !== "show") {
+      dest = "show";
     }
 
     var curr_window = window

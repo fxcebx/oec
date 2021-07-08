@@ -37,18 +37,23 @@ Adding the Observatory to computer via virtualenv
         git clone https://github.com/alexandersimoes/oec.git
 2. Create the virtual environment
 
-        mkvirtualenv oec
+        virtualenv oec
 3. Activate this newly created environment
 
-        workon oec
-4. Install the required Python libraries
+        . /path/to/oec/bin/activate
+4. Install required software
+
+        mysql
+        # if using homebrew, not install ONLY the client
+        brew install mysql --client-only --universal
+5. Install the required Python libraries
 
         pip install -r requirements.txt
-5. Create a MySQL database on your local machine
-6. Import the latest dump of the database from [atlas.media.mit.edu/static/db/](https://atlas.media.mit.edu/static/db/)
+6. Create a MySQL database on your local machine
+7. Import the latest dump of the database from [18.85.28.32/static/db/](http://18.85.28.32/static/db/) (warning this step could take hours!)
 
         mysql -u username -p -h localhost DB_NAME < oec_xxxx-xx-xx.sql
-7. Be sure to create the following local environment variables
+8. Be sure to create the following local environment variables
 
         export OEC_SECRET_KEY=some_s3cret_k3y
         export OEC_DB_USER=my_db_username
@@ -58,31 +63,34 @@ Adding the Observatory to computer via virtualenv
         * export CACHE_DIR=/home/
 
         * only necessary if using filesystem caching
-8. Updating translations (if something is changed)
+9. Updating translations (if something is changed)
 
         pybabel extract -F babel.cfg -o messages.pot oec --no-location --omit-header --no-wrap
-        pybabel update -i messages.pot -d oec/translations --no-location --omit-header --no-wrap
-        pybabel compile -d oec/translations
+        pybabel update -i messages.pot -d oec/translations --no-wrap --no-fuzzy-matching -l [2-LETTER-LANG-CODE]
+        pybabel compile -d oec/translations -l [2-LETTER-LANG-CODE] --statistics
+10. Running the testing server
+        
+        python run.py runserver
 
 
-#Deploying to a linux server
-###Step 1: Install virtual environments and pip
+# Deploying to a linux server
+### Step 1: Install virtual environments and pip
 ```$ sudo apt-get install python-virtualenv python-pip git libmysqlclient-dev python-dev```
 
-###Step 2: Create virtual environment
+### Step 2: Create virtual environment
 ```$ virtualenv oec```
 ```$ source oec/bin/activate```
 
-###Step 3: Pull in app from github
+### Step 3: Pull in app from github
 ```$ git clone https://github.com/alexandersimoes/oec.git -b v3.0 —-single-branch```
 
-###Step 4: Install python requirements
+### Step 4: Install python requirements
 ```$ pip install -r requirements.txt```
 
-###Step 5: Install gunicorn
+### Step 5: Install gunicorn
 ```$ pip install gunicorn```
 
-###Step 6: Set environment vars
+### Step 6: Set environment vars
 ```
 export OEC_SECRET_KEY=yet_another_supers3cret_k35y
 export OEC_DB_USER=oec_user
@@ -93,10 +101,10 @@ export CACHE_DIR=/home/macro/sites/oec/cache
 export OEC_PRODUCTION=1
 ```
 
-###Step 7: Make cache directory
+### Step 7: Make cache directory
 ```$ mkdir /home/macro/sites/oec/cache```
 
-###Step 7: Create nginx config 
+### Step 8: Create nginx config 
 ```$ sudo nano /etc/nginx/sites-available/oec.conf```
 
 ```
@@ -122,16 +130,16 @@ server {
 ```
 ```$ sudo ln -s /etc/nginx/sites-available/oec.conf /etc/nginx/sites-enabled/```
  
-###Step 8: Create dir for logs
+### Step 9: Create dir for logs
 ```$ mkdir /home/macro/sites/oec/logs```
 
-###Step 9: Check nginx config
+### Step 10: Check nginx config
 ```$ sudo nginx -t```
 
-###Step 10: Using supervisor to autostart/manage gunicorn process
+### Step 11: Using supervisor to autostart/manage gunicorn process
 ```sudo apt-get install supervisor```
 
-###Step 11: Create supervisor config
+### Step 11: Create supervisor config
 ```$ sudo nano /etc/supervisor/conf.d/oec.conf```
 
 ```
@@ -144,7 +152,7 @@ redirect_stderr = true
 environment=PATH="/home/macro/venv/oec/bin", OEC_SECRET_KEY="oec-secret-key", OEC_DB_USER="oec_user", OEC_DB_PW="oec_pw", OEC_DB_HOST="localhost", OEC_DB_NAME="oec", CACHE_DIR="/home/macro/sites/oec/cache", OEC_PRODUCTION="1"
 ```
 
-###Step 13: Start up supervisor
+### Step 12: Start up supervisor
 ```
 $ sudo supervisorctl reread
 $ sudo supervisorctl update

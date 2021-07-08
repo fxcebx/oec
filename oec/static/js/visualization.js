@@ -45,6 +45,10 @@ var visualization = function(build, container) {
 
       if(text){
 
+        if (text === "pini") {
+          return "PGI Value";
+        }
+
         if (text.indexOf("<img") === 0) {
           return text;
         }
@@ -86,7 +90,13 @@ var visualization = function(build, container) {
   })
 
   /* If not on the explore page, show the title! */
-  if (window.parent.location.href.indexOf("/embed/") > 0) {
+  try {
+    var same_origin = window.parent.location.host == window.location.host;
+  }
+  catch (e) {
+    var same_origin = false;
+  }
+  if (same_origin && window.parent.location.href.indexOf("/embed/") > 0) {
     viz.title(build.title.toUpperCase());
   }
 
@@ -159,8 +169,18 @@ configs.default = function(build, container) {
     tooltip_data.push("year");
   }
 
+  if (build.trade_flow === "pgi") {
+    tooltip_data.push("pini");
+  }
+
   var background = "none", curtain = "black", text = "#333333";
-  if(window.parent.location.host == window.location.host){
+  try {
+    var same_origin = window.parent.location.host == window.location.host;
+  }
+  catch (e) {
+    var same_origin = false;
+  }
+  if(same_origin){
     if (window.location.href.indexOf("/profile/") > 0) {
       background = d3.select(container.node().parentNode.parentNode.parentNode).style("background-color");
     }
@@ -205,7 +225,7 @@ configs.default = function(build, container) {
         "url": function(focus_id){
           container.select(".viz_loader").classed("visible", true);
           var display_id = focus_id.substring(2).replace("_export", "").replace("_import", "");
-          var attr_type = build.attr_type.indexOf("hs") >= 0 ? "prod_id" : build.attr_type+"_id";
+          var attr_type = (build.attr_type.indexOf("hs") >= 0 || build.attr_type=="sitc") ? "prod_id" : build.attr_type+"_id";
           var url_args = "?trade_flow="+build.trade_flow+"&classification="+build.classification+"&"+attr_type+"="+display_id+"&focus="+attr_type;
           ['origin', 'dest', 'prod'].forEach(function(filter){
             if(typeof build[filter] != "string"){
@@ -244,7 +264,8 @@ configs.default = function(build, container) {
       "pci": "mean",
       "eci": "mean",
       "export_rca": "mean",
-      "import_rca": "mean"
+      "import_rca": "mean",
+      "pini": "mean"
     },
     "axes": {
       "background": {
@@ -289,7 +310,7 @@ configs.default = function(build, container) {
       },
       "padding": 15
     },
-    "legend": {"filters":true},
+    "legend": {"filters":true, "order":"text"},
     "messages": {
       "branding": {
         "image": {
@@ -305,7 +326,7 @@ configs.default = function(build, container) {
       "value": build.trade_flow+"_val",
       "threshold": false
     },
-    "text": {"nest":"name", "id":["name", "display_id"]},
+    "text": {"nest":"name", "id":["name", "display_id"], "pini_class":"pini_class"},
     "time": {"value": "year", "solo": build.year },
     "title": {
       "font": {
@@ -321,6 +342,16 @@ configs.default = function(build, container) {
           "transform": "uppercase",
           "weight": 400
         }
+      },
+      "total": {
+        "font": {
+          "color": text,
+          "family": ["Montserrat", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+          "size": 16,
+          "transform": "uppercase",
+          "weight": 400
+        },
+        "value": ["line", "scatter"].indexOf(build.viz.slug) < 0
       }
     },
     "tooltip": tooltip,
@@ -373,18 +404,13 @@ configs.geo_map = function(build, container) {
   return {
     "color": build.trade_flow+"_val",
     "coords": {
-      "center": [10,0],
+      "key": "countries",
       "padding": 0,
       "mute": ["anata"],
       "value": "/static/json/country_coords.json"
     },
     "depth": 1,
     "size": "export_val",
-    "x": "eci",
-    "y": {
-      "scale": "log",
-      "value": build.trade_flow
-    },
     "ui": [
       {"method":show_all_years, "value":["Show all years"], "type":"button"},
       {"method":"color", "value": [
@@ -545,14 +571,38 @@ configs.network = function(build, container) {
     ];
   }
 
+  if(build.trade_flow === "pgi"){
+    var colors = ["#2e34a4", "#459ed5", "#96e3e3", "#ffffcc", "#fe964e", "#d34503", "#9a0a04"];
+    var color_scale = d3.scale.quantile().range(d3.range(7)).domain([32, 53]);
+    var color = function(d){
+      if(d.id.constructor === Array){
+        var thisId = d.id[0].id;
+      }
+      else {
+        var thisId = d.id;
+      }
+      if(build.attrs[thisId]){
+        if(build.attrs[thisId]["pini"]){
+          return colors[color_scale(build.attrs[thisId]["pini"])]
+        }
+      }
+      return "blue";
+    };
+    var id = ["pini_class","id"];
+  }
+  else {
+    var color = "color";
+    var id = ["nest","id"];
+  }
+
   return {
     "active": {
-      "value": function(d){
+      "value": build.origin.id !== "xxwld" ? function(d){
         return d.export_rca >= 1;
-      },
-      "spotlight":true
+      } : false,
+      "spotlight": true
     },
-    "color": "color",
+    "color": color,
     "depth": 1,
     // "edges": {
     //     "value": "/static/json/just_edges.json",
@@ -560,7 +610,7 @@ configs.network = function(build, container) {
     //       return network.edges
     //     }
     // },
-    "id": ["nest","id"],
+    "id": id,
     "nodes": {
       "overlap": 1.1,
     },
@@ -713,14 +763,33 @@ configs.tree_map = function(build, container) {
 }
 
 function format_data(raw_data, attrs, build){
-
+  
   var data = raw_data.data;
   var opposite_trade_flow = build.trade_flow == "export" ? "import" : "export";
   var attr_id = attr_id = build.attr_type + "_id";
+  var pini_domain = [32, 53];
+  var pini_scale = d3.scale.quantile().range(d3.range(7)).domain(pini_domain);
+  var pini_buckets = [32].concat(pini_scale.quantiles()).concat([53])
+
+  // remove germany for tree maps before 1985
+  if(build.classification === "sitc" && build.viz.slug === "tree_map") {
+    data = data.filter(function(d) {
+      return !(d.year < 1985 && d.origin_id === "eudeu");
+    })
+  }
 
   // go through raw data and set each items nest and id vars properly
   // also calculate net values
   data.forEach(function(d){
+
+    // only assign "pini_class" if the dataset is SITC
+    if(build.attr_type === "sitc") {
+      if(attrs[d[attr_id]]) {
+        var bucket = pini_scale(attrs[d[attr_id]].pini);
+        d.pini_class = "PGIs ("+pini_buckets[bucket]+" - "+pini_buckets[bucket+1]+")";
+      }
+    }
+
     d.nest = d[attr_id].substr(0, 2)
     if(attr_id.indexOf("hs") == 0){
       d.nest_mid = d[attr_id].substr(0, 6)
@@ -792,10 +861,31 @@ function format_attrs(raw_attrs, build){
 }
 
 function format_csv_data(data, attrs, build){
-  csv_data = [];
-  ccp = ["origin", "dest", "prod"]
+  var csv_data = [];
+
+  if(build.trade_flow === "show" && build.viz.slug === "line") {
+    var cols = ["year", "country_id", "country_name", "eci", "export_val", "import_val", "gdp", "gdp_pc_constant", "gdp_pc_constant_ppp", "gdp_pc_current", "gdp_pc_current_ppp"];
+    csv_data.push(cols)
+    data.forEach(function(d){
+      var row = [];
+      cols.forEach(function(column){
+        if(column.indexOf("country_id") > -1){
+          row.push(attrs[d.id].display_id);
+        }
+        else if(column.indexOf("country_name") > -1){
+          row.push(attrs[d.id].name);
+        }
+        else {
+          row.push(d[column]);
+        }
+      })
+      csv_data.push(row);
+    });
+    return csv_data;
+  }
 
   // format columns
+  var ccp = ["origin", "dest", "prod"];
   var show_id = build.attr_type + "_id";
   var trade_flow = build.trade_flow + "_val";
   csv_data.push(['year', 'country_origin_id', 'country_destination_id', build.classification+'_product_id', trade_flow, trade_flow+"_pct"])
@@ -803,7 +893,7 @@ function format_csv_data(data, attrs, build){
   // format data
   var total_val = d3.sum(data, function(d){ return d[trade_flow]; });
   data.forEach(function(d){
-    if(d[trade_flow]){
+    if(d[trade_flow] || trade_flow === "show_val"){
       var attr = attrs[d[show_id]]
       datum = [d['year']]
       ccp.forEach(function(x){
@@ -920,7 +1010,12 @@ function share(build){
 
   return function(){
     var lang = build.lang;
-    var same_origin = window.parent.location.host == window.location.host;
+    try {
+      var same_origin = window.parent.location.host == window.location.host;
+    }
+    catch (e) {
+      var same_origin = false;
+    }
     var url = encodeURIComponent("/"+lang+"/visualize/"+build.url)
 
     // make post request to server for short URL
@@ -937,7 +1032,7 @@ function share(build){
       })
 
     // set embed link
-    d3.select(".modal-body input.embed_code").property("value", '<iframe width="560" height="315" src="http://atlas.media.mit.edu/'+lang+'/visualize/embed/'+build.url+'?controls=false" frameborder="0" ></iframe>')
+    d3.select(".modal-body input.embed_code").property("value", '<iframe width="560" height="315" src="https://oec.world/'+lang+'/visualize/embed/'+build.url+'?controls=false" frameborder="0" ></iframe>')
 
     // set social media link URLs
     d3.selectAll(".modal-body a#Facebook").attr("href", build.social.facebook)

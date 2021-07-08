@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from oec import db, available_years, excluded_countries
 from oec.utils import AutoSerialize, exist_or_404
 from oec.db_attr.abstract_models import ProdAttr, ProdNameAttr
-from flask.ext.babel import gettext as _
+from flask_babel import gettext as _
 
 class Country(db.Model, AutoSerialize):
 
@@ -100,10 +100,10 @@ class Country(db.Model, AutoSerialize):
             plural = getattr(name, "plural", 0)
             gender = getattr(name, "gender", "m")
             needed = getattr(name, "article", 0)
-            
+
             # Romance Langs
             if lang in ('es','pt','fr','nl','it','de'):
-            
+
                 if article == "the" or article is True:
                     if gender == "m" and needed:
                         article = _("article_the_m_p") if plural else _("article_the_m")
@@ -118,22 +118,28 @@ class Country(db.Model, AutoSerialize):
                         article = _("article_of_m_p") if plural else _("article_of_m")
                     elif gender == "f":
                         article = _("article_of_f_p") if plural else _("article_of_f")
-                
+                if article == "in":
+                    if not needed:
+                        article = _("article_in")
+                    elif gender == "m":
+                        article = _("article_in_m_p") if plural else _("article_in_m")
+                    elif gender == "f":
+                        article = _("article_in_f_p") if plural else _("article_in_f")
                 if article:
                     if lang == "fr":
                         if article.lower()[-1] in vowels and name.name.lower()[0] in vowels:
                             txt = u"{}'{}".format("".join(article[:-1]), name.name)
                     else:
                         txt = u"{} {}".format(article, name.name)
-            
+
             # Turkish
             elif lang == "tr":
-                
+
                 if article == "of":
                     if name.name[-1] in vowels:
                         txt = u"{}'nın".format(name.name)
                     txt = u"{}'ın".format(name.name)
-            
+
             # English
             elif lang == "en":
                 if needed and (article is True or article == "the"):
@@ -142,12 +148,12 @@ class Country(db.Model, AutoSerialize):
                     txt = u"{} {} {}".format(article, "the", name.name)
                 elif article and (article is not True and article != "the"):
                     txt = u"{} {}".format(article, name.name)
-            
+
             if verb == "is":
                 if lang != "en":
                     verb = _("verb_is_p") if plural else _("verb_is")
                 txt = u"{} {}".format(txt, verb)
-            
+
             return txt
 
         #     ''' French '''
@@ -385,6 +391,8 @@ class Hs07_name(db.Model, AutoSerialize, ProdNameAttr):
 class Sitc(ProdAttr):
     __tablename__ = 'attr_sitc'
     sitc = db.Column(db.String(6))
+    pini = db.Column(db.Float())
+    pini_class = db.Column(db.Integer)
 
     name = db.relationship("Sitc_name", backref="sitc", lazy="dynamic")
     yodp_product = db.relationship("db_data.sitc_models.Yodp", backref = 'product', lazy = 'dynamic')
@@ -407,6 +415,7 @@ class Yo(db.Model, AutoSerialize):
     year = db.Column(db.Integer, primary_key=True)
     origin_id = db.Column(db.String(5), db.ForeignKey(Country.id), primary_key=True)
     eci = db.Column(db.Float())
+    neci = db.Column(db.Float())
     eci_rank = db.Column(db.Integer)
     eci_rank_delta = db.Column(db.Integer)
     opp_value = db.Column(db.Float())

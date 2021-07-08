@@ -29,8 +29,8 @@ def attrs(attr="country", lang='en'):
     Attr_name = globals()[attr.title()+"_name"]
     Attr_data = data_models.Yo if attr == "country" else data_models.Yp
     join_id = "origin_id" if attr == "country" else attr+"_id"
-    latest_year = available_years[data_classification][-1]
-    
+    latest_year = available_years[data_classification][-2]
+
     q = db.session.query(Attr) \
         .outerjoin(Attr_data, and_(Attr.id == getattr(Attr_data, join_id), Attr_data.year == latest_year)) \
         .outerjoin(Attr_name, getattr(Attr_name, join_id) == Attr.id) \
@@ -38,11 +38,15 @@ def attrs(attr="country", lang='en'):
         .add_entity(Attr_data) \
         .filter(Attr_name.lang == lang)
 
+    total_weight = sum(filter(None, [a[2].export_val for a in q.all() if a[2]]))
+
     for attr, attr_name, attr_data in q.all():
         attr = attr.serialize()
         attr["name"] = attr_name.name
         if attr_data:
             attr["weight"] = attr_data.export_val
+        if attr["id"] == "xxwld":
+            attr["weight"] = total_weight
         if hasattr(attr_name, "keywords"):
             attr["keywords"] = attr_name.keywords
         attrs.append(attr)

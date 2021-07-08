@@ -2,7 +2,12 @@ function share(build){
 
   return function(){
     var lang = build.lang;
-    var same_origin = window.parent.location.host == window.location.host;
+    try {
+      var same_origin = window.parent.location.host == window.location.host;
+    }
+    catch (e) {
+      var same_origin = false;
+    }
     var url = encodeURIComponent("/"+lang+"/visualize/"+build.url)
 
     // make post request to server for short URL
@@ -19,7 +24,7 @@ function share(build){
       })
 
     // set embed link
-    d3.select(".modal-body input.embed_code").property("value", '<iframe width="560" height="315" src="http://atlas.media.mit.edu/'+lang+'/visualize/embed/'+build.url+'?controls=false" frameborder="0" ></iframe>')
+    d3.select(".modal-body input.embed_code").property("value", '<iframe width="560" height="315" src="https://oec.world/'+lang+'/visualize/embed/'+build.url+'?controls=false" frameborder="0" ></iframe>')
 
     // set social media link URLs
     d3.selectAll(".modal-body a#Facebook").attr("href", build.social.facebook)

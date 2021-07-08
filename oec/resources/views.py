@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
-from flask import Blueprint, g, render_template
+from flask import Blueprint, g, render_template, redirect, url_for
 from oec import app
 from oec.general.views import get_locale
 
-mod = Blueprint('resources', __name__, url_prefix='/<any("ar","de","el","en","es","fr","he","hi","it","ja","ko","mn","nl","ru","pt","tr","zh"):lang>/resources')
+mod = Blueprint('resources', __name__, url_prefix='/<any("ar","de","el","en","es","fr","he","hi","it","ja","ko","mn","nl","ru","pt","tr","vi","zh"):lang>/resources')
 
 @mod.url_value_preprocessor
 def get_profile_owner(endpoint, values):
@@ -24,7 +24,7 @@ def about():
             "name": u"Alexander Simoes",
             "slug": u"alexander_simoes",
             "time": u"2010 – Present",
-            "text": u"Alex is the lead developer on the Observatory project. He has been working in the Macro Connections group developing technologies to better inform policy and decision makers by equipping them with tools to make sense of large datasets.",
+            "text": u"Alex is the lead developer on the Observatory project. He has been working in the Macro Connections group developing technologies to better inform policy and decision makers by equipping them with tools to make sense of large datasets. He is a co-founder of the MIT spin-off <a href='http://www.datawheel.us/'>Datawheel</a>, a company specializing in building digital transformation tools at a large scale.",
             "links": {
                 "github-alt": "https://github.com/alexandersimoes",
                 "twitter": "https://twitter.com/ximoes",
@@ -51,21 +51,21 @@ def about():
                 "twitter": "https://twitter.com/cesifoti",
                 "linkedin-square": "http://www.linkedin.com/pub/cesar-a-hidalgo/5/30a/a61"
             }
-        },
+        }
+    ]
+
+    past = [
         {
             "name": u"Melissa Teng",
             "slug": u"melissa_teng",
-            "time": u"2015 – Present",
+            "time": u"2015 – 2017",
             "text": u"Melissa led the 2015 redesign of the website, focusing on a humanist approach to data. She built on the site's visual identity and user experience, as well as supported some front-end development.",
             "links": {
                 "github-alt": "https://github.com/melteng",
                 "twitter": "https://twitter.com/melisteng",
                 "linkedin-square": "http://www.linkedin.com/in/mqteng/"
             }
-        }
-    ]
-
-    past = [
+        },
         {
             "name": u"Eric Franco",
             "slug": u"eric_franco",
@@ -169,5 +169,9 @@ def permissions():
 
 @mod.route('/economic_complexity/')
 def eci():
-    g.page_type = "eci"
-    return render_template("resources/eci.html")
+    return redirect(url_for('.methodology', lang=g.locale))
+
+@mod.route('/methodology/')
+def methodology():
+    g.page_type = "methodology"
+    return render_template("resources/methodology.html")

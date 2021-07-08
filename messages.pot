@@ -85,6 +85,21 @@ msgstr ""
 msgid "article_of_f"
 msgstr ""
 
+msgid "article_in"
+msgstr ""
+
+msgid "article_in_m_p"
+msgstr ""
+
+msgid "article_in_m"
+msgstr ""
+
+msgid "article_in_f_p"
+msgstr ""
+
+msgid "article_in_f"
+msgstr ""
+
 msgid "verb_is_p"
 msgstr ""
 
@@ -94,16 +109,22 @@ msgstr ""
 msgid "The Observatory of Economic Complexity"
 msgstr ""
 
-msgid "We are the world's<br/>leading visualization engine<br/>for international trade data."
+msgid "We are the world's leading visualization engine for international trade data."
 msgstr ""
 
 msgid "Learn More"
+msgstr ""
+
+msgid "Watch a video"
 msgstr ""
 
 msgid "Search"
 msgstr ""
 
 msgid "Application programming interface (API) for querying the raw data used throughout The Observatory of Economic Complexity."
+msgstr ""
+
+msgid "Publications"
 msgstr ""
 
 msgid "Books"
@@ -124,67 +145,120 @@ msgstr ""
 msgid "Rankings"
 msgstr ""
 
-msgid "Publications"
+msgid "About"
 msgstr ""
 
-msgid "Resources"
+msgid "Data"
 msgstr ""
 
-msgid "About the Site"
+msgid "Methodology"
 msgstr ""
 
-msgid "Economic Complexity"
-msgstr ""
-
-msgid "FAQs"
-msgstr ""
-
-msgid "Data Sources"
+msgid "The Site"
 msgstr ""
 
 msgid "Permissions"
 msgstr ""
 
+msgid "FAQs"
+msgstr ""
+
 msgid "API"
 msgstr ""
 
-msgid "Take a tour"
+msgid "Exports"
 msgstr ""
 
-msgid "Prev. Year"
+msgid "Imports"
 msgstr ""
 
-msgid " Rankings"
+msgid "and"
 msgstr ""
 
-msgid "Click here for Product Rankings"
+msgid "Trade Partners"
+msgstr ""
+
+msgid "Product Trade"
+msgstr ""
+
+msgid "Exporters"
+msgstr ""
+
+msgid "Importers"
+msgstr ""
+
+msgid "of"
+msgstr ""
+
+#, python-format
+msgid "Looking for commercial partners %(in_country)s? List your company on"
+msgstr ""
+
+msgid "Importer"
+msgstr ""
+
+msgid "Exporter"
+msgstr ""
+
+msgid "Explore on Visualizations page"
+msgstr ""
+
+msgid "Data Sources"
+msgstr ""
+
+msgid "Economic Complexity Ranking of Countries"
+msgstr ""
+
+#, python-format
+msgid "Economic Complexity Ranking of %(classification)s Products"
+msgstr ""
+
+msgid "Economic Complexity ranking of countries based on their ECI values."
+msgstr ""
+
+msgid "Economic Complexity ranking of products based on their PCI values."
+msgstr ""
+
+msgid "Economic Complexity"
 msgstr ""
 
 msgid "Product Complexity"
 msgstr ""
 
-msgid "Click here for Country Rankings"
+#, python-format
+msgid "The Economic Complexity Index (ECI) and the Product Complexity Index (PCI) are, respectively, measures of the relative knowledge intensity of an economy or a product. ECI measures the knowledge intensity of an economy by considering the knowledge intensity of the products it exports. PCI measures the knowledge intensity of a product by considering the knowledge intensity of its exporters. This circular argument is mathematically tractable and can be used to construct relative measures of the knowledge intensity of economies and products (see %(a_open)smethodology section%(a_close)s for more details)."
 msgstr ""
 
-msgid "Next Year"
+#, python-format
+msgid "ECI has been validated as a relevant economic measure by showing its ability to predict future economic growth (see %(paper_link)s), and explain international variations in income inequality (see %(paper_link2)s."
 msgstr ""
 
-msgid "Previous Year"
+#, python-format
+msgid "ECI+ and PCI+ are improved measures of economic complexity (see %(paper_link)s) that consider the total exports of a country adjusted by how difficult it is to export each product. ECI+ is slightly more accurate than ECI at predicting future economic growth, and also, is mathematically simpler to define."
 msgstr ""
 
-msgid "Dataset"
+msgid "This page includes rankings using the Economic Complexity Index  (ECI)."
 msgstr ""
 
-msgid "Year"
-msgstr ""
-
-msgid "Depth"
-msgstr ""
-
-msgid "Download Current Year"
+msgid "Download"
 msgstr ""
 
 msgid "Download All Years"
+msgstr ""
+
+msgid "Showing"
+msgstr ""
+
+msgid "ECI Type"
+msgstr ""
+
+msgid "Product Classification"
+msgstr ""
+
+msgid "Year Range"
+msgstr ""
+
+msgid "About the Site"
 msgstr ""
 
 msgid "Photos and descriptions of the team members involved in the creation of The Observatory."
@@ -202,16 +276,16 @@ msgstr ""
 msgid "HS, SITC, and Country classification with their corresponding IDs and values."
 msgstr ""
 
+msgid "Frequently Asked Questions"
+msgstr ""
+
+msgid "Revealed Compared Advantage (RCA)"
+msgstr ""
+
 msgid "What is Economic Complexity?"
 msgstr ""
 
 msgid "How is Economic Complexity calculated?"
-msgstr ""
-
-msgid "Who makes what?"
-msgstr ""
-
-msgid "Frequently Asked Questions"
 msgstr ""
 
 msgid "A Development blog of updates to the site."
@@ -229,16 +303,22 @@ msgstr ""
 msgid "Social Media"
 msgstr ""
 
-msgid "Download"
+msgid "Home"
 msgstr ""
 
-msgid "Home"
+msgid "No Filter"
 msgstr ""
 
 msgid "An emedded visualization."
 msgstr ""
 
 msgid "Data visualization of economic trade"
+msgstr ""
+
+msgid "Controls"
+msgstr ""
+
+msgid "Close"
 msgstr ""
 
 msgid "Build Visualization"
@@ -250,19 +330,28 @@ msgstr ""
 msgid "Profile"
 msgstr ""
 
-msgid "and"
+msgid "Population"
+msgstr ""
+
+msgid "GDP"
+msgstr ""
+
+msgid "GDP Per Capita"
 msgstr ""
 
 msgid "Econ Complexity"
 msgstr ""
 
-msgid "Exports"
+#, python-format
+msgid "The total world trade in %(year)s was %(export_val)s."
 msgstr ""
 
-msgid "Imports"
+#, python-format
+msgid "The 10 most traded products by dollar amount are %(exports_list)s, using the 1992 revision of the HS (Harmonized System) classification."
 msgstr ""
 
-msgid "GDP Per Capita"
+#, python-format
+msgid "The top 10 exporting countries are %(origins_list)s."
 msgstr ""
 
 #, python-format
@@ -270,11 +359,11 @@ msgid "%(country_is)s the %(econ_rank)s largest export economy in the world"
 msgstr ""
 
 #, python-format
-msgid " and the %(eci_rank)s most complex economy according to the Economic Complexity Index (ECI). "
+msgid "and the %(eci_rank)s most complex economy according to the Economic Complexity Index (ECI)."
 msgstr ""
 
 #, python-format
-msgid "In %(year)s, %(country)s exported $%(export_val)s and imported $%(import_val)s, resulting in a %(positive_negative)s trade balance of $%(trade_delta)s. "
+msgid "In %(year)s, %(country)s exported $%(export_val)s and imported $%(import_val)s, resulting in a %(positive_negative)s trade balance of $%(trade_delta)s."
 msgstr ""
 
 #, python-format
@@ -301,12 +390,33 @@ msgstr ""
 msgid "%(country)s borders %(land_borders)s by land and %(maritime_borders)s by sea."
 msgstr ""
 
-#, python-format
-msgid "In %(year)s %(country)s exported $%(export_val)s, making it the %(export_rank)s largest exporter in the world. "
+msgid "increased"
+msgstr ""
+
+msgid "decreased"
 msgstr ""
 
 #, python-format
-msgid "During the last five years the exports %(of_country)s have %(increased_decreased)s at an annualized rate of %(change_rate)s%%, from $%(past_export_val)s in %(past_year)s to $%(current_export_val)s in %(current_year)s. "
+msgid "During the last five years exports have %(increased_decreased)s at a median annualized rate of %(change_rate)s%%, from $%(past_export_val)s in %(past_year)s to $%(current_export_val)s in %(current_year)s."
+msgstr ""
+
+#, python-format
+msgid "The most recent exports are led by %(top_export)s which represent %(top_export_pct)s%% of the total products exported, followed by %(second_export)s, which account for %(second_export_pct)s%%."
+msgstr ""
+
+#, python-format
+msgid "The top exporters globally are %(origins)s."
+msgstr ""
+
+msgid "Origins"
+msgstr ""
+
+#, python-format
+msgid "In %(year)s %(country)s exported $%(export_val)s, making it the %(export_rank)s largest exporter in the world."
+msgstr ""
+
+#, python-format
+msgid "During the last five years the exports %(of_country)s have %(increased_decreased)s at an annualized rate of %(change_rate)s%%, from $%(past_export_val)s in %(past_year)s to $%(current_export_val)s in %(current_year)s."
 msgstr ""
 
 #, python-format
@@ -314,11 +424,11 @@ msgid "The most recent exports are led by %(top_export)s which represent %(top_e
 msgstr ""
 
 #, python-format
-msgid "In %(year)s %(country)s imported $%(import_val)s, making it the %(import_rank)s largest importer in the world. "
+msgid "In %(year)s %(country)s imported $%(import_val)s, making it the %(import_rank)s largest importer in the world."
 msgstr ""
 
 #, python-format
-msgid "During the last five years the imports %(of_country)s have %(increased_decreased)s at an annualized rate of %(change_rate)s%%, from $%(past_import_val)s in %(past_year)s to $%(current_import_val)s in %(current_year)s. "
+msgid "During the last five years the imports %(of_country)s have %(increased_decreased)s at an annualized rate of %(change_rate)s%%, from $%(past_import_val)s in %(past_year)s to $%(current_import_val)s in %(current_year)s."
 msgstr ""
 
 #, python-format
@@ -353,7 +463,7 @@ msgid "still"
 msgstr ""
 
 #, python-format
-msgid " As compared to their trade balance in %(year)s when they %(still)s had a %(positive_negative)s trade balance of $%(net_trade)s in net %(exports_imports)s."
+msgid "As compared to their trade balance in %(year)s when they %(still)s had a %(positive_negative)s trade balance of $%(net_trade)s in net %(exports_imports)s."
 msgstr ""
 
 msgid "Trade Balance"
@@ -362,11 +472,8 @@ msgstr ""
 msgid "Destinations"
 msgstr ""
 
-msgid "Origins"
-msgstr ""
-
 #, python-format
-msgid "The economy %(of_country)s has an Economic Complexity Index (ECI) of %(eci)s making it the %(eci_rank)s most complex country. "
+msgid "The economy %(of_country)s has an Economic Complexity Index (ECI) of %(eci)s making it the %(eci_rank)s most complex country."
 msgstr ""
 
 #, python-format
@@ -383,64 +490,26 @@ msgstr ""
 msgid "Product Space"
 msgstr ""
 
-msgid "increased"
+#, python-format
+msgid "In this version of the product space products are colored according to their Product Gini Index, or PGI. The PGI of a product is the level of income inequality that we expect for the countries that export a product. For more information see: %(paper1)s and %(paper2)s."
 msgstr ""
 
-msgid "decreased"
+msgid "Complexity and Income Inequality"
 msgstr ""
 
 #, python-format
-msgid ""
-"The Economic Complexity ranking %(of_country)s has %(increased_or_decreased)s by %(rank_delta)s places\n"
-"                    over the past %(year_range)s years from %(old_eci)s in %(old_year)s to %(current_eci)s in %(current_year)s."
+msgid "The Economic Complexity of each country visualized over the past %(year_range)s years."
 msgstr ""
 
 msgid "Economic Complexity Ranking"
 msgstr ""
 
 #, python-format
-msgid "More on %(country)s from our sister sites"
+msgid "The Economic Complexity ranking %(of_country)s has %(increased_or_decreased)s by %(rank_delta)s places over the past %(year_range)s years from %(old_eci)s in %(old_year)s to %(current_eci)s in %(current_year)s."
 msgstr ""
 
 #, python-format
-msgid ""
-"\n"
-"            This treemap shows the municipalities in Brazil that imported products from %(country)s.<br /><br />\n"
-"            DataViva is a visualization tool that provides official data on trade, industries, and education throughout Brazil. If you would like more info or to create a similar site get in touch with us at <a href='mailto:oec@media.mit.edu'>oec@media.mit.edu</a>.\n"
-"            </p><p><a target='_blank' href='http://dataviva.info/apps/builder/tree_map/secex/all/all/%(dv_country_id)s/bra/?size=import_val&controls=false'>Explore on DataViva <i class='fa fa-external-link'></i></a>\n"
-"            "
-msgstr ""
-
-#, python-format
-msgid ""
-"\n"
-"            This treemap shows the municipalities in Brazil that exported products to %(country)s.\n"
-"            </p><p><a target='_blank' href='http://dataviva.info/apps/builder/tree_map/secex/all/all/%(dv_country_id)s/bra/?size=export_val&controls=false'>Explore on DataViva <i class='fa fa-external-link'></i></a>\n"
-"            "
-msgstr ""
-
-#, python-format
-msgid "Brazilian Municipalities that import from %(country)s"
-msgstr ""
-
-#, python-format
-msgid "Brazilian Municipalities that export to %(country)s"
-msgstr ""
-
-#, python-format
-msgid "Globally Famous People %(of_country)s"
-msgstr ""
-
-#, python-format
-msgid "This treemap shows the cultural exports %(of_country)s, as proxied by the production of globally famous historical characters.</p><p>%(pantheon_link)s"
-msgstr ""
-
-#, python-format
-msgid "Globally Famous People %(of_country)s by City"
-msgstr ""
-
-#, python-format
-msgid "This treemap shows the cultural exports %(of_country)s by city, as proxied by the production of globally famous historical characters.</p><p>%(pantheon_link)s"
+msgid "More on %(country)s from our other sites"
 msgstr ""
 
 msgid "Top Exporter"
@@ -453,8 +522,11 @@ msgstr ""
 msgid "%(product)s the %(economic_rank)s most traded product"
 msgstr ""
 
+msgid "Product Complexity Index"
+msgstr ""
+
 #, python-format
-msgid " and the %(pci_rank)s most complex product according to the <a href='/en/rankings/hs92/'>Product Complexity Index (PCI)</a>"
+msgid "and the %(pci_rank)s most complex product according to the %(pci_ranking_link)s"
 msgstr ""
 
 #, python-format
@@ -477,10 +549,126 @@ msgstr ""
 msgid "%(product)s a %(product_id_length)s digit %(classification)s product."
 msgstr ""
 
-msgid "Rank"
+#, python-format
+msgid "%(product_name)s Trade"
 msgstr ""
 
-msgid "ID"
+#, python-format
+msgid "This treemap shows the share of countries that export %(product)s."
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the share of countries that import %(product)s."
+msgstr ""
+
+#, python-format
+msgid "This visualization shows products that are likely to be exported by countries that export %(product)s."
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the crops produced in %(country)s sized by their production value."
+msgstr ""
+
+#, python-format
+msgid "Data Africa is an open-source platform designed to provide information on health, agriculture, climate, and poverty across 13 focus countries in Africa. If you would like more info or to create a similar site get in touch with us at %(oec_email)s."
+msgstr ""
+
+#, python-format
+msgid "Explore More Data on %(country)s"
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the crops produced in %(country)s sized by their harvested area in hectares."
+msgstr ""
+
+msgid "Crops by Production Value"
+msgstr ""
+
+msgid "Crops by Harvested Area"
+msgstr ""
+
+msgid "This map shows the states in the United States colored by median income."
+msgstr ""
+
+#, python-format
+msgid "Data USA is the most comprehensive visualization of U.S. public data. If you would like more info or to create a similar site get in touch with us at %(oec_email)s."
+msgstr ""
+
+msgid "Explore on Data USA"
+msgstr ""
+
+msgid "This bar chart shows the wage distribution in the United States."
+msgstr ""
+
+msgid "Income by Location"
+msgstr ""
+
+msgid "This treemap shows the municipalities in Brazil that imported products internationally."
+msgstr ""
+
+#, python-format
+msgid "DataViva is a visualization tool that provides official data on trade, industries, and education throughout Brazil. If you would like more info or to create a similar site get in touch with us at %(oec_email)s."
+msgstr ""
+
+msgid "Explore on DataViva"
+msgstr ""
+
+msgid "Imports of Brazil by Municipality"
+msgstr ""
+
+msgid "This map shows the exports of Brazil by state."
+msgstr ""
+
+msgid "This bar chart shows the wage distribution for the working population in Brazil."
+msgstr ""
+
+msgid "State Exports"
+msgstr ""
+
+msgid "Wage Distribution"
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the municipalities in Brazil that imported products from %(country)s."
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the municipalities in Brazil that exported products to %(country)s."
+msgstr ""
+
+#, python-format
+msgid "Brazilian Municipalities that import from %(country)s"
+msgstr ""
+
+#, python-format
+msgid "Brazilian Municipalities that export to %(country)s"
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the municipalities in Brazil that export %(product)s."
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the municipalities in Brazil that import %(product)s."
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the cultural exports %(of_country)s, as proxied by the production of globally famous historical characters"
+msgstr ""
+
+msgid "Explore on Pantheon"
+msgstr ""
+
+#, python-format
+msgid "This treemap shows the cultural exports %(of_country)s by city, as proxied by the production of globally famous historical characters."
+msgstr ""
+
+#, python-format
+msgid "Globally Famous People %(of_country)s"
+msgstr ""
+
+#, python-format
+msgid "Globally Famous People %(of_country)s by City"
 msgstr ""
 
 msgid "Country"
@@ -507,13 +695,10 @@ msgstr ""
 msgid "Market Value"
 msgstr ""
 
-msgid "Export"
+msgid "Export RCA"
 msgstr ""
 
-msgid "Import"
-msgstr ""
-
-msgid "GDP"
+msgid "Import RCA"
 msgstr ""
 
 msgid "GDPpc (constant '05 US$)"
@@ -534,6 +719,9 @@ msgstr ""
 msgid "ECI Rank"
 msgstr ""
 
+msgid "ID"
+msgstr ""
+
 msgid "Annual Growth Rate (1 year)"
 msgstr ""
 
@@ -546,6 +734,15 @@ msgstr ""
 msgid "Growth Value (5 year)"
 msgstr ""
 
+msgid "Loading..."
+msgstr ""
+
+msgid "Loading Visualization"
+msgstr ""
+
+msgid "We couldn't find any results."
+msgstr ""
+
 msgid "Partner"
 msgstr ""
 
@@ -555,10 +752,22 @@ msgstr ""
 msgid "Trade Flow"
 msgstr ""
 
+msgid "Export"
+msgstr ""
+
+msgid "Import"
+msgstr ""
+
+msgid "Dataset"
+msgstr ""
+
 msgid "Start Year"
 msgstr ""
 
 msgid "End Year"
+msgstr ""
+
+msgid "Year"
 msgstr ""
 
 #, python-format

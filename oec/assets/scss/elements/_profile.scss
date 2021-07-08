@@ -8,6 +8,48 @@ body.profile.frozen {
 body.profile {
   background-color: $darkbackground;
 
+  .macromarket {
+    background-color: #fafafa;
+    border: 1px solid $lightbordercolor;
+    color: black;
+    font-family: $source-sans;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    padding: 10px;
+    @include text-align(justify);
+
+    & > a {
+      @include transition(border-bottom 0.1s);
+      border-bottom: 1px solid transparent;
+      color: $darklinkcolor;
+      text-decoration: none;
+      &:hover {
+        border-bottom: 1px solid $darklinkcolor;
+      }
+    }
+    .links {
+      margin-top: 5px;
+      text-align: center;
+      a {
+        background-color: #dbb706;
+        border: 1px solid transparent;
+        color: black;
+        display: inline-block;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin: 5px;
+        padding: 6px 10px;
+        text-transform: uppercase;
+        &:hover {
+          border: 1px solid black;
+        }
+      }
+    }
+  }
+
   h1 {
     line-height: 1;
     @include margin(0, 30px, -5px, 30px);
@@ -50,7 +92,11 @@ body.profile {
 
       p.explore_link {
         @media all and (max-width: 768px) {
-          margin-bottom: 13px !important;
+          margin-bottom: 12px !important;
+        }
+        a {
+          display: inline-block;
+          margin: 0 0 6px 0;
         }
       }
 
@@ -170,10 +216,13 @@ body.profile {
       @include flex;
       @include align-items(center);
       @include flex-direction(row);
+      @include justify(flex-start);
       @include margin(20px, 10px, 20px, 10px);
+      padding-right: 350px;
 
       @media all and (max-width: 768px) {
         @include justify(center);
+        padding-right: 0;
       }
 
       .icon {
@@ -255,7 +304,6 @@ body.profile {
     }
 
     .share {
-
       $icon-width: 25px;
 
       position: absolute;
@@ -345,6 +393,23 @@ body.profile {
         }
       }
 
+    }
+
+    .macromarket {
+      background-color: transparent;
+      border: 0;
+      color: white;
+      line-height: 1.4;
+      padding: 0;
+      position: absolute;
+      @include right(53px);
+      text-align: center;
+      top: 0;
+      width: 300px;
+
+      @media all and (max-width: 768px) {
+        display: none;
+      }
     }
 
     #stats {
@@ -665,12 +730,42 @@ body.profile {
 
     }
 
+    div.country-banner {
+      padding: 0 0 10px 0;
+      text-align: center;
+      img {
+        max-width:100%;
+        height:auto;
+      }
+      h3 {
+        font-size: 18px !important;
+        padding: 10px 0;
+        text-align: center;
+        a {
+          background-color: #dbb706;
+          color: black;
+        }
+      }
+    }
+
     div.columns p {
       @include text-align(justify);
 
       @media all and (max-width: 768px) {
-        @include text-align(left);
+        @include text-align(justify);
       }
+    }
+
+    .macromarket {
+      display: none;
+
+      @media all and (max-width: 768px) {
+        display: block;
+      }
+    }
+
+    div.gads {
+      margin: 10px 0 0 0;
     }
 
   }
@@ -698,6 +793,10 @@ body.profile {
 
     }
 
+    #topojson-xxwld .coords {
+      stroke: white !important;
+    }
+
     @media all and (max-width: 768px) {
       display: none;
     }
@@ -713,7 +812,7 @@ body.profile {
   article.viz-article {
 
     p {
-      @include text-align(left);
+      @include text-align(justify);
     }
 
     content {
@@ -739,7 +838,7 @@ body.profile {
     }
 
     p {
-      @include text-align(left);
+      @include text-align(justify);
     }
 
     p img {
@@ -893,15 +992,15 @@ body.profile {
     font-weight: 400;
     line-height: 17px;
     list-style-type: none;
-    overflow: scroll;
     @include padding(0, 20px, 0, 15px);
 
     li {
-      @include padding(3px, 0, 3px, 0);
+      @include padding(2px, 0, 2px, 0);
+      display: block;
       a {
         color: $darklinkcolor;
-        font-size: 16px;
-        line-height: 1.3;
+        font-size: 14px;
+        line-height: 1;
         &:hover {
           opacity: 0.7;
         }
@@ -912,17 +1011,24 @@ body.profile {
       }
     }
 
+    @media all and (max-width: 768px) {
+      text-align: center;
+      .depth6, .depth8 {
+        display: inline-block;
+      }
+    }
+
     .depth2 {
       font-size: 22px;
       line-height: 35px;
     }
 
     .depth6 {
-      @include margin-left(10px);
+      margin: 0 10px;
     }
 
     .depth8 {
-      @include margin-left(20px);
+      margin: 0 20px;
     }
   }
 
@@ -944,7 +1050,7 @@ body.profile {
 
     }
 
-    &.pantheon, &.dataviva {
+    &.pantheon, &.dataviva, &.datausa {
 
       h1 {
         border-top: 0;
@@ -956,6 +1062,62 @@ body.profile {
 
         @media all and (max-width: 768px) {
           text-align: center;
+        }
+      }
+
+    }
+
+    &.datausa {
+      background-color: #e9e9e9;
+
+      h1 a img {
+        width: 200px;
+      }
+
+      p {
+        color: rgba(51, 51, 51, 0.93);
+      }
+
+      section aside h2 {
+        display: none;
+      }
+
+      section aside a {
+        color: #ef6145;
+
+        &:hover {
+          border-bottom: 1px solid #ef6145;
+        }
+      }
+
+    }
+
+    &.dataafrica {
+      background-color: #FFF;
+
+      h1 a img {
+        width: 226px;
+      }
+
+      p {
+        color: #FFF;
+      }
+
+      section aside {
+        p {
+          color: #222;
+        }
+
+        h2 {
+          display: none;
+        }
+
+        a {
+          color: #74E19A;
+
+          &:hover {
+            border-bottom: 1px solid #74E19A;
+          }
         }
       }
 
@@ -1015,7 +1177,7 @@ body.profile {
     }
 
     &.pantheon {
-      background-color: #F9F6E3;
+      background-color: #F4F4F1;
       color: $black;
 
       p {
@@ -1027,11 +1189,21 @@ body.profile {
       }
 
       h1 img {
-        width: ($sidebar + 120);
+        max-width: ($sidebar + 120);
+        width: 100%;
         padding-bottom: 20px;
       }
 
       section aside a {
+        color: black;
+        border-bottom: 1px solid black;
+
+        &:hover {
+          border-bottom: none;
+        }
+      }
+
+      section aside a.viz_link {
         color: black;
         text-transform: uppercase;
         letter-spacing: 0.1em;

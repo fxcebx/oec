@@ -23,14 +23,38 @@ configs.network = function(build, container) {
     ];
   }
 
+  if(build.trade_flow === "pgi"){
+    var colors = ["#2e34a4", "#459ed5", "#96e3e3", "#ffffcc", "#fe964e", "#d34503", "#9a0a04"];
+    var color_scale = d3.scale.quantile().range(d3.range(7)).domain([32, 53]);
+    var color = function(d){
+      if(d.id.constructor === Array){
+        var thisId = d.id[0].id;
+      }
+      else {
+        var thisId = d.id;
+      }
+      if(build.attrs[thisId]){
+        if(build.attrs[thisId]["pini"]){
+          return colors[color_scale(build.attrs[thisId]["pini"])]
+        }
+      }
+      return "blue";
+    };
+    var id = ["pini_class","id"];
+  }
+  else {
+    var color = "color";
+    var id = ["nest","id"];
+  }
+
   return {
     "active": {
-      "value": function(d){
+      "value": build.origin.id !== "xxwld" ? function(d){
         return d.export_rca >= 1;
-      },
-      "spotlight":true
+      } : false,
+      "spotlight": true
     },
-    "color": "color",
+    "color": color,
     "depth": 1,
     // "edges": {
     //     "value": "/static/json/just_edges.json",
@@ -38,7 +62,7 @@ configs.network = function(build, container) {
     //       return network.edges
     //     }
     // },
-    "id": ["nest","id"],
+    "id": id,
     "nodes": {
       "overlap": 1.1,
     },

@@ -3,7 +3,7 @@ import tempfile, subprocess
 from werkzeug.routing import ValidationError, BaseConverter
 from flask import Blueprint, render_template, g, request, session, redirect, \
                     url_for, flash, jsonify, Response, abort, make_response
-from flask.ext.babel import gettext
+from flask_babel import gettext
 
 from oec import app, db, babel, view_cache, random_countries, available_years, oec_dir
 from oec.utils import make_query, make_cache_key, compile_query
@@ -14,11 +14,11 @@ from oec import db_data, db_attr
 from oec.general.views import get_locale
 from oec.visualize.models import Build, get_all_builds, Short
 from sqlalchemy.sql.expression import func
-from sqlalchemy import not_
+from sqlalchemy import not_, desc
 from random import choice
 from config import FACEBOOK_ID
 
-mod = Blueprint('visualize', __name__, url_prefix='/<any("ar","de","el","en","es","fr","he","hi","it","ja","ko","mn","nl","ru","pt","tr","zh"):lang>/visualize')
+mod = Blueprint('visualize', __name__, url_prefix='/<any("ar","de","el","en","es","fr","he","hi","it","ja","ko","mn","nl","ru","pt","tr","vi","zh"):lang>/visualize')
 
 @mod.url_value_preprocessor
 def get_profile_owner(endpoint, values):
@@ -79,28 +79,32 @@ def sanitize(app_name, classification, trade_flow, origin, dest, product, year):
     if origin == "twn" and dest != "all":
         c = Country.query.filter_by(id_3char=origin).first()
         origin = "chn"
-        msg = "Bilateral trade not available for {0}. ".format(c.get_name())
+        msg = u"Bilateral trade not available for {}. ".format(c.get_name())
     if "hs" in classification:
         if origin in ["nam", "lso", "bwa", "swz"]:
             c = Country.query.filter_by(id_3char=origin).first()
             origin = "zaf"
-            msg = "{0} reports their trade under South Africa in the HS classification. ".format(c.get_name())
+            msg = u"{} reports their trade under South Africa in the HS classification. ".format(c.get_name())
         if dest in ["nam", "lso", "bwa", "swz"]:
             c = Country.query.filter_by(id_3char=dest).first()
             dest = "zaf"
-            msg = "{0} reports their trade under South Africa in the HS classification. ".format(c.get_name())
+            msg = u"{} reports their trade under South Africa in the HS classification. ".format(c.get_name())
         if origin in ["bel", "lux"]:
             c = Country.query.filter_by(id_3char=origin).first()
             origin = "blx"
-            msg = "{0} reports their trade under Belgium-Luxembourg in the HS classification. ".format(c.get_name())
+            msg = u"{} reports their trade under Belgium-Luxembourg in the HS classification. ".format(c.get_name())
         if dest in ["bel", "lux"]:
             c = Country.query.filter_by(id_3char=dest).first()
             dest = "blx"
-            msg = "{0} reports their trade under Belgium-Luxembourg in the HS classification. ".format(c.get_name())
+            msg = u"{} reports their trade under Belgium-Luxembourg in the HS classification. ".format(c.get_name())
     '''Check that stacked has given year range'''
     if app_name in ["stacked", "line"] and len(year) < 2:
         msg = "Need to specify a range of years"
         year = [available_years[classification][0], available_years[classification][-1]]
+    '''Check that scatter is in acceptable year range 1980+'''
+    if app_name == "scatter" and not year:
+        msg = "GDP data only available from 1980 onwards. "
+        year = [1980]
 
     if msg:
         redirect_url = url_for('.visualize', lang=g.locale, app_name=app_name, \
@@ -113,19 +117,26 @@ def get_origin_dest_prod(origin_id, dest_id, prod_id, classification, year, trad
     prod_tbl = getattr(db_attr.models, classification.capitalize())
     data_tbls = getattr(db_data, "{}_models".format(classification))
 
-    origin = Country.query.filter_by(id_3char=origin_id).first()
-    dest = Country.query.filter_by(id_3char=dest_id).first()
+    origin = Country.query.filter_by(id_3char=origin_id).first() if origin_id else origin_id
+    dest = Country.query.filter_by(id_3char=dest_id).first() if dest_id else dest_id
     product = prod_tbl.query.filter(getattr(prod_tbl, classification) == prod_id).first()
 
     defaults = {"origin":"nausa", "dest":"aschn", "hs92":"010101", "hs96":"010101", "hs02":"010101", "hs07":"010101", "sitc":"105722"}
 
     if not origin:
-        # find the largest exporter or importer of given product
-        direction = "top_exporter" if trade_flow == "export" else "top_importer"
-        origin = getattr(data_tbls, "Yp").query.filter_by(year=year[-1]) \
-                        .filter_by(product=product).first()
-        origin = defaults["origin"] if not origin else getattr(origin, direction)
-        origin = Country.query.get(origin)
+        if dest:
+            origin = getattr(data_tbls, "Yod").query \
+                .filter_by(year=year[-1]) \
+                .filter_by(dest=dest) \
+                .order_by(desc("export_val")).first()
+            origin = origin.origin if origin else defaults["origin"]
+        else:
+            # find the largest exporter or importer of given product
+            direction = "top_exporter" if trade_flow == "export" else "top_importer"
+            origin = getattr(data_tbls, "Yp").query.filter_by(year=year[-1]) \
+                            .filter_by(product=product).first()
+            origin = defaults["origin"] if not origin else getattr(origin, direction)
+            origin = Country.query.get(origin)
 
     if not dest:
         if product:
@@ -134,7 +145,7 @@ def get_origin_dest_prod(origin_id, dest_id, prod_id, classification, year, trad
             dest = getattr(data_tbls, "Yp").query.filter_by(year=year[-1]) \
                             .filter_by(product=product).first()
             if not dest:
-              dest = Country.query.get("nausa")
+              dest = Country.query.get(defaults["dest"])
             else:
               dest = Country.query.get(getattr(dest, direction))
         else:
@@ -144,7 +155,7 @@ def get_origin_dest_prod(origin_id, dest_id, prod_id, classification, year, trad
                             .filter_by(country=origin).first()
             dest = defaults["dest"] if not dest else getattr(dest, direction)
             if not dest:
-                dest = Country.query.get("nausa")
+                dest = Country.query.get(defaults["dest"])
             else:
                 dest = Country.query.get(dest)
 
@@ -154,8 +165,10 @@ def get_origin_dest_prod(origin_id, dest_id, prod_id, classification, year, trad
         direction = "top_{}".format(tf) if classification == "sitc" else "top_{}_hs4".format(tf)
         product = getattr(data_tbls, "Yo").query.filter_by(year=year[-1]) \
                         .filter_by(country=origin).first()
-        product = defaults[classification] if not product else getattr(product, direction)
-        product = prod_tbl.query.get(product)
+        if product and getattr(product, direction):
+            product = getattr(product, direction)
+        else:
+            product = defaults[classification]
 
     return (origin, dest, product)
 
@@ -253,12 +266,14 @@ def visualize(app_name, classification, trade_flow, origin_id, dest_id, prod_id,
         flash(redir[0])
         return redirect(redir[1])
 
+    '''get this build'''
+    build = Build(app_name, classification, trade_flow, origin_id, dest_id, prod_id, year)
+    if build.title() is None and build.question() is None:
+        abort(404)
+
     '''get every possible build for sub nav'''
     origin, dest, prod = get_origin_dest_prod(origin_id, dest_id, prod_id, classification, year, trade_flow)
     all_builds = get_all_builds(classification, origin_id, dest_id, prod_id, year, {"origin":origin, "dest":dest, "prod":prod})
-
-    '''get this build'''
-    build = Build(app_name, classification, trade_flow, origin_id, dest_id, prod_id, year)
 
     '''create the ui array for the current build'''
     ui = []
@@ -391,6 +406,8 @@ def visualize(app_name, classification, trade_flow, origin_id, dest_id, prod_id,
 @mod.route('/embed/<app_name>/<classification>/<trade_flow>/<origin_id>/<dest_id>/<prod_id>/<year:year>/')
 def embed(app_name, classification, trade_flow, origin_id, dest_id, \
                 prod_id, year=available_years['hs92'][-1]):
+
+    g.page_type = "embed"
     '''support for legacy URLs that use hs not hs92'''
     if classification not in ['sitc', 'hs92', 'hs96', 'hs02', 'hs07']:
         return redirect(url_for('.embed', lang=g.locale, app_name=app_name, \
@@ -422,9 +439,17 @@ def builds():
     build_args["year"] = request.args.get('year', available_years[build_args["classification"]][-1])
     build_args["defaults"] = {"origin":"nausa", "dest":"aschn", "prod":"010101"}
     build_args["viz"] = ["tree_map", "rings"]
+
+    if build_args["origin_id"] == build_args["dest_id"]:
+        origin_dest_prod = get_origin_dest_prod(None, build_args["dest_id"], build_args["prod_id"], build_args["classification"], [build_args["year"]], "export")
+        build_args["dest_id"] = origin_dest_prod[0].id_3char
+
     all_builds = get_all_builds(**build_args)
 
-    # raise Exception(build_args, all_builds[-1])
+    if build_args["origin_id"] and build_args["dest_id"]:
+        build_args["origin_id"], build_args["dest_id"] = build_args["dest_id"], build_args["origin_id"]
+        all_builds = get_all_builds(**build_args) + all_builds
+
     '''
         Need some way of ranking these build...
     '''
@@ -444,9 +469,9 @@ def builds():
 
 
     if focus == "origin_id":
-        attr = Country.query.filter_by(id_3char=build_args["origin_id"]).first()
+        attr = Country.query.filter_by(id_3char=build_args["origin_id"]).first() or Country.query.filter(Country.id.endswith(build_args["origin_id"])).first()
     elif focus == "dest_id":
-        attr = Country.query.filter_by(id_3char=build_args["dest_id"]).first()
+        attr = Country.query.filter_by(id_3char=build_args["dest_id"]).first() or Country.query.filter(Country.id.endswith(build_args["dest_id"])).first()
     elif focus == "prod_id":
         tbl = globals()[build_args["classification"].title()]
         c = build_args["classification"]

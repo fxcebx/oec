@@ -42,6 +42,10 @@ var visualization = function(build, container) {
 
       if(text){
 
+        if (text === "pini") {
+          return "PGI Value";
+        }
+
         if (text.indexOf("<img") === 0) {
           return text;
         }
@@ -83,7 +87,13 @@ var visualization = function(build, container) {
   })
 
   /* If not on the explore page, show the title! */
-  if (window.parent.location.href.indexOf("/embed/") > 0) {
+  try {
+    var same_origin = window.parent.location.host == window.location.host;
+  }
+  catch (e) {
+    var same_origin = false;
+  }
+  if (same_origin && window.parent.location.href.indexOf("/embed/") > 0) {
     viz.title(build.title.toUpperCase());
   }
 

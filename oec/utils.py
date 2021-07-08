@@ -3,7 +3,7 @@ from re import sub
 from jinja2 import Markup
 from babel.numbers import format_decimal
 from flask import abort, current_app, jsonify, request, g, get_flashed_messages, url_for
-from flask.ext.babel import gettext, pgettext, ngettext
+from flask_babel import gettext, pgettext, ngettext
 from werkzeug.routing import BaseConverter
 from datetime import datetime, date, timedelta
 from math import ceil
@@ -89,6 +89,15 @@ def format_currency(value):
 
 def format_percent(value):
     return "{:.2g}%".format(value)
+
+def median(lst):
+    lst = sorted(lst)
+    if len(lst) < 1:
+        return None
+    if len(lst) %2 == 1:
+        return lst[((len(lst)+1)/2)-1]
+    else:
+        return float(sum(lst[(len(lst)/2)-1:(len(lst)/2)+1]))/2.0
 
 def langify(path, lang):
     possible_langs = [l[0] for l in g.supported_langs]
@@ -209,7 +218,8 @@ def affixes(key):
     lookup = {
         "export_val": ["$", ""],
         "import_val": ["$", ""],
-        "gdp": ["$", ""]
+        "gdp": ["$", ""],
+        "gdp_pc_current_ppp": ["$", ""]
     }
     if key in lookup:
         return lookup[key]
@@ -290,7 +300,8 @@ def num_format(number, key=None, labels=True, suffix_html=False):
     # If the language is not English, translate the suffix.
     if suffix:
         if g.locale != "en":
-            suffix = u"{0}".format(plurals(key=suffix, n=raw_n))
+            suffix = u"{0}".format(plurals(key=suffix, n=1))
+            # suffix = u"{0}".format(plurals(key=suffix, n=raw_n))
             # suffix = u"{0}".format(suffix)
         if len(suffix) > 1:
             n = u"{0} <span class='suffix'>{1}</span>".format(n,suffix)

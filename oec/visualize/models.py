@@ -1,7 +1,7 @@
 import json, string, random
 from datetime import datetime
 from flask import g, url_for
-from oec import db
+from oec import db, available_years
 from oec.db_attr.models import Country, Hs92, Hs96, Hs02, Hs07, Sitc
 from config import FACEBOOK_ID
 
@@ -23,7 +23,7 @@ all_viz = [
     2. tmap/stacked of countries that export/import a product
     3. tmap/stacked of products exported/imported from a destination
     4. tmap/stacked of destinations that a country exports a product to
-    5. network of product space
+    5. network of product space and PGI product space
     6. rings
     7. scatter of PCI by GDP
     8. line chart of trade balance
@@ -102,15 +102,21 @@ build_metadata = { \
     5: {
         "export": {
             "title": u"Product Space of {origin}",
-            "question": u"What does {origin} export?",
+            "question": u"What are the export opportunities of {origin}?",
             "short_name": "Product Space",
+            "category": "Country"
+        },
+        "pgi": {
+            "title": u"PGI Product Space of {origin}",
+            "question": u"What are the PGI values of the products exported by {origin}?",
+            "short_name": "PGI Product Space",
             "category": "Country"
         }
     },
     6: {
         "export": {
             "title": u"Connections of {prod} in {origin}",
-            "question": u"Where does {origin} export {prod} to?",
+            "question": u"What does {origin} export that is similar to {prod}?",
             "short_name": "Product Connections",
             "category": "Country"
         }
@@ -236,6 +242,7 @@ class Build(object):
 
     def year_to_str(self, year):
         if len(year) == 1:
+            print self.viz, self.classification, year[0]
             return year[0]
         else:
             interval = year[1] - year[0]
@@ -281,30 +288,37 @@ class Build(object):
         )
 
     def facebook_url(self):
-        link = u"http://atlas.media.mit.edu/{}/visualize/{}".format(g.locale, self.url())
+        link = u"https://oec.world/{}/visualize/{}".format(g.locale, self.url())
         return u"http://www.facebook.com/dialog/feed?caption=The Observatory of Economic Complexity&" \
                 "display=popup&app_id={}&name={}&link={}&" \
-                "redirect_uri=http://atlas.media.mit.edu/close/&" \
-                "picture=http://atlas.media.mit.edu/static/img/facebook.jpg" \
+                "redirect_uri=https://oec.world/close/&" \
+                "picture=https://oec.world/static/img/facebook.jpg" \
                 .format(FACEBOOK_ID, self.title(), link)
     def twitter_url(self):
-        link = u"http://atlas.media.mit.edu/{}/visualize/{}".format(g.locale, self.url())
+        link = u"https://oec.world/{}/visualize/{}".format(g.locale, self.url())
         lang_txt = u"&lang={}".format(g.locale) if g.locale != "en" else ""
         return u"https://twitter.com/share?url={}{}&text={}&hashtags=oec" \
                 .format(link, lang_txt, self.title())
     def google_url(self):
-        link = u"http://atlas.media.mit.edu/{}/visualize/{}".format(g.locale, self.url())
+        link = u"https://oec.world/{}/visualize/{}".format(g.locale, self.url())
         return u"https://plus.google.com/share?url={}&hl={}" \
                 .format(link, g.locale)
 
     def title(self):
-        title = build_metadata[self.id][self.trade_flow]["title"]
+        try:
+            title = build_metadata[self.id][self.trade_flow]["title"]
+        except KeyError:
+            return None
 
         origin, dest, prod = None, None, None
+        if self.origin == "all":
+            origin="all countries"
+        if self.dest == "all":
+            dest="all countries"
         if isinstance(self.origin, Country):
-            origin=self.origin.get_name()
+            origin=self.origin.get_name(article="the")
         if isinstance(self.dest, Country):
-            dest=self.dest.get_name()
+            dest=self.dest.get_name(article="the")
         if isinstance(self.prod, (Hs92, Hs96, Hs02, Hs07, Sitc)):
             prod=self.prod.get_name()
 
@@ -316,13 +330,20 @@ class Build(object):
         return u"{} ({})".format(title, years)
 
     def question(self):
-        question = build_metadata[self.id][self.trade_flow]["question"]
+        try:
+            question = build_metadata[self.id][self.trade_flow]["question"]
+        except KeyError:
+            return None
 
         origin, dest, prod = None, None, None
+        if self.origin == "all":
+            origin="the world"
+        if self.dest == "all":
+            dest="the world"
         if isinstance(self.origin, Country):
-            origin=self.origin.get_name()
+            origin=self.origin.get_name(article="the")
         if isinstance(self.dest, Country):
-            dest=self.dest.get_name()
+            dest=self.dest.get_name(article="the")
         if isinstance(self.prod, (Hs92, Hs96, Hs02, Hs07, Sitc)):
             prod=self.prod.get_name()
 
@@ -345,7 +366,7 @@ class Build(object):
         if self.viz["slug"] == "line" and self.trade_flow == "eci":
             return "/attr/eci/"
 
-        if self.viz["slug"] == "stacked" or self.viz["slug"] == "network":
+        if self.viz["slug"] in ("stacked", "network", "line"):
             output_depth = 6
         elif self.viz["slug"] == "rings":
             output_depth = len(self.prod.id)
@@ -360,6 +381,8 @@ class Build(object):
 
         if self.viz["slug"] == "rings" or (isinstance(prod, (Sitc, Hs92, Hs96, Hs02, Hs07)) and dest == "all" and isinstance(origin, Country)):
             prod = "show"
+            xtra_args = "?output_depth={}_id_len.{}".format(self.classification, output_depth)
+        elif self.viz["slug"] in ("stacked", "line") and origin == "all" and prod == "show":
             xtra_args = "?output_depth={}_id_len.{}".format(self.classification, output_depth)
         elif isinstance(prod, (Sitc, Hs92, Hs96, Hs02, Hs07)):
             xtra_args = "?output_depth={}_id_len.{}".format(self.classification, len(prod.id))
@@ -451,7 +474,7 @@ def get_all_builds(classification, origin_id, dest_id, prod_id, year, defaults, 
                     all_builds.append(build)
 
         elif v["slug"] == "network":
-            '''network aka product space only has 1 build'''
+            '''network aka product space has 2 builds'''
 
             build = Build(
                 viz = v["slug"],
@@ -461,6 +484,15 @@ def get_all_builds(classification, origin_id, dest_id, prod_id, year, defaults, 
                 dest = "all",
                 prod = "show",
                 year = year)
+            all_builds.append(build)
+            build = Build(
+                viz = v["slug"],
+                classification = "sitc",
+                trade_flow = "pgi",
+                origin = origin_id,
+                dest = "all",
+                prod = "show",
+                year = min(year, available_years["sitc"][-1]))
             all_builds.append(build)
 
         elif v["slug"] == "rings":

@@ -1,7 +1,13 @@
 {% extends "templates/nav.html" %}
 
 {% set title = profile.title() %}
-{% block title %} - {{ title }}{% endblock %}
+{% block title %}
+{% if g.page_sub_type == "country" %}
+ - {{ profile.attr.get_name() }} ({{ profile.attr.get_display_id()|upper }}) {{_('Exports')}}, {{_('Imports')}}, {{_('and')}} {{_('Trade Partners')}}
+{% else %}
+ - {{ profile.attr.get_name() }} ({{ profile.classification|upper }}: {{ profile.attr.get_display_id() }}) {{_('Product Trade')}}, {{_('Exporters')}} {{_('and')}} {{_('Importers')}}
+{% endif %}
+{% endblock %}
 
 {% block body %}
 
@@ -37,7 +43,7 @@
         <sub>
           {{ stat.title }}
           {% if stat.rank %}
-          <span class="rank">{{ stat.rank|num_format('ordinal') }} of {{ stat.total }}</span>
+          <span class="rank">{{ stat.rank|num_format('ordinal') }} {{ _("of") }} {{ stat.total }}</span>
           {% endif %}
         </sub>
       </div>
@@ -76,8 +82,23 @@
         </a>
       </div>
     </div>
-
     <img src="/static/img/profile/share.png" alt="share">
+  </div>
+
+  <div class="macromarket">
+  {% if g.page_sub_type == "country" %}
+    {{ _('Looking for commercial partners %(in_country)s? List your company on', in_country=profile.attr.get_name(article="in")) }} <a href="https://macro.market/" target="_blank" data-ga="country-homepage" data-ga-cat="macro-market" data-ga-label="Country Homepage">Macro Market</a>.
+    <div class="links">
+      <a href="https://macro.market/country/{{profile.attr.id}}?source=oec" target="_blank" data-ga="country-importer" data-ga-cat="macro-market" data-ga-label="Country Importer">{{ _('Importer') }}</a>
+      <a href="https://macro.market/country/{{profile.attr.id}}?source=oec" target="_blank" data-ga="country-exporter" data-ga-cat="macro-market" data-ga-label="Country Exporter">{{ _('Exporter') }}</a>
+    </div>
+  {% else %}
+    Looking to buy or sell {{ title }}? List your company on <a href="https://macro.market/" target="_blank" data-ga="product-homepage" data-ga-cat="macro-market" data-ga-label="Product Homepage">Macro Market</a>.
+    <div class="links">
+      <a href="https://macro.market/product/{{profile.attr.id}}?source=oec" target="_blank" data-ga="product-importer" data-ga-cat="macro-market" data-ga-label="Product Importer">{{ _('Importer') }}</a>
+      <a href="https://macro.market/product/{{profile.attr.id}}?source=oec" target="_blank" data-ga="product-importer" data-ga-cat="macro-market" data-ga-label="Product Exporter">{{ _('Exporter') }}</a>
+    </div>
+  {% endif %}
   </div>
 
 </header>
@@ -106,23 +127,38 @@
       <li class="depth6"><a href="#{{ build.title|replace(" ","_") }}">{{ build.title }}</a></li>
       {% endfor %}
       {% endfor %}
-
-      {% if g.page_sub_type == "country" or profile.classification == "hs92" %}
-      <li class="depth6"><a href="#dataviva">DataViva</a></li>
-      {% endif %}
-
-      {% if g.page_sub_type == "country" %}
-      <li class="depth6"><a href="#pantheon">Pantheon</a></li>
-      {% endif %}
     </ul>
 
   </aside>
 
   <content>
+    {% if profile.attr.get_display_id() == "est" %}
+    <div class="country-banner">
+      <a href="https://data.stat.ee/profile/country/ee/?locale=en">
+        <img src="https://www.stat.ee/public/banners/fookus/valiskaubandus_eng.gif" alt="Learn more about Estonia Trade Data" />
+      </a>
+      <h3>Want to learn more about Estonian trade data? <a target="_blank" href="https://data.stat.ee/profile/country/ee/?locale=en">Click here <i class="fa fa-external-link"></i></a>.</h3>
+    </div>
+    {% endif %}
     <div class="columns">
-    {% for p in profile.intro() %}
-      <p>{{ p|safe }}</p>
-    {% endfor %}
+      <div class="macromarket">
+      {% if g.page_sub_type == "country" %}
+        {{ _('Looking for commercial partners %(in_country)s? List your company on', in_country=profile.attr.get_name(article="in")) }} <a href="https://macro.market/" target="_blank" data-ga="country-homepage" data-ga-cat="macro-market" data-ga-label="Country Homepage">Macro Market</a>.
+        <div class="links">
+          <a href="https://macro.market/country/{{profile.attr.id}}" target="_blank" data-ga="country-importer" data-ga-cat="macro-market" data-ga-label="Country Importer">{{ _('Importer') }}</a>
+          <a href="https://macro.market/country/{{profile.attr.id}}" target="_blank" data-ga="country-exporter" data-ga-cat="macro-market" data-ga-label="Country Exporter">{{ _('Exporter') }}</a>
+        </div>
+      {% else %}
+        Looking to buy or sell {{ title }}? List your company on <a href="https://macro.market/" target="_blank" data-ga="product-homepage" data-ga-cat="macro-market" data-ga-label="Product Homepage">Macro Market</a>.
+        <div class="links">
+          <a href="https://macro.market/product/{{profile.attr.id}}" target="_blank" data-ga="product-importer" data-ga-cat="macro-market" data-ga-label="Product Importer">{{ _('Importer') }}</a>
+          <a href="https://macro.market/product/{{profile.attr.id}}" target="_blank" data-ga="product-importer" data-ga-cat="macro-market" data-ga-label="Product Exporter">{{ _('Exporter') }}</a>
+        </div>
+      {% endif %}
+      </div>
+      {% for p in profile.intro() %}
+        <p>{{ p|safe }}</p>
+      {% endfor %}
     </div>
   </content>
 </section>
@@ -157,13 +193,23 @@
   {% for build in section.builds %}
   <section {% if build.tour %}data-position="floating" data-step="{{ build.seq }}" data-intro="{{ build.tour }}"{% endif %}>
     <aside>
-      <h2><a name="{% if section.source %}{{ section.source }}{% else %}{{ build.title|replace(" ","_") }}{% endif %}" class="anchor"></a>{{ build.title }}</h2>
+      <a name="{% if section.source %}{{ section.source }}{% else %}{{ build.title|replace(" ","_") }}{% endif %}" class="anchor"></a>
+      <h2>{{ build.title }}</h2>
       {% if build.subtitle %}
-      <p>{{ build.subtitle|safe }}</p>
+
+      {% if build.subtitle is string %}
+        <p>{{ build.subtitle|safe }}</p>
+      {% else %}
+        {% for pg in build.subtitle %}
+        <p>{{ pg|safe }}</p>
+        {% endfor %}
+      {% endif %}
+
       {% endif %}
       {% if not build.iframe %}
       <p class="explore_link">
-        <a href="/{{ g.locale }}/visualize/{{ build.build.url() }}" class="deep-link" target="_blank">Explore on Visualizations page <i class="fa fa-external-link"></i></a>
+        <a href="/{{ g.locale }}/visualize/{{ build.build.url() }}" class="deep-link" target="_blank">{{ _('Explore on Visualizations page') }} <i class="fa fa-external-link"></i></a>
+        <a href="/en/resources/data/" class="deep-link" target="_blank">{{ _('Data Sources') }} <i class="fa fa-external-link"></i></a>
       </p>
       <div class="share_container">
         <div class="share_icons_container">
@@ -181,9 +227,8 @@
           </a>
         </div>
         <div class="share_input_container">
-            <input class="share_input share_short_url" type="text" value="http://atlas.media.mit.edu/{{ g.locale }}/visualize/{{ build.build.url() }}" />
-
-            <input class="share_input share_embed_url" type="text" value='&lt;iframe width="560" height="315" src="http://atlas.media.mit.edu/{{ g.locale }}/visualize/embed/{{ build.build.url() }}?controls=false" frameborder="0" &gt;&lt;/iframe&gt;' />
+            <input class="share_input share_short_url" type="text" value="https://oec.world/{{ g.locale }}/visualize/{{ build.build.url() }}" />
+            <input class="share_input share_embed_url" type="text" value='&lt;iframe width="560" height="315" src="https://oec.world/{{ g.locale }}/visualize/embed/{{ build.build.url() }}?controls=false" frameborder="0" &gt;&lt;/iframe&gt;' />
         </div>
       </div>
       {% endif %}
@@ -246,6 +291,11 @@
   //   color = d3plus.color.legible("{{ profile.attr.color }}");
   // }
   // color = d3plus.color.legible("{{ profile.attr.color }}");
+  window.onload = function() {
+    d3.selectAll("ins").each(function() {
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    })
+  }
 
   d3.selectAll(".sparkline").each(function(){
     var w = d3.select(this).node().offsetWidth;
@@ -299,9 +349,9 @@
   var map = d3.select("#topojson");
   if (!map.empty()) {
 
-    load("/static/json/country_coords.json", function(coords){
+    load("/static/json/country_coords.json?v=2", function(coords){
 
-      var key = d3.keys(coords.objects)[0],
+      var key = "countries",
           id = "{{ profile.attr.id }}",
           width = 250,
           height = width;
@@ -323,95 +373,111 @@
         geo_ids = ["eubel", "eulux"];
       }
 
-      coords.objects[key].geometries = [];
-      geo_ids.forEach(function(g){
-        coords.objects[key].geometries.push(coords.objects[key].lookup[g]);
-      })
-
       // List of countries that get cropped in the regular projection
-      var rotate = ["eurus"].indexOf(id) >= 0 ? -155 : 0;
+      var projection = d3.geo.mercator(),
+          path;
 
-      var projection = d3.geo.mercator().rotate([rotate,0]).scale(1).translate([0, 0]),
-          path = d3.geo.path().projection(projection),
-          country = topojson.feature(coords, coords.objects[key]).features[0];
+      if (id === "xxwld") {
 
-      // List of countries specifying how many landmasses to zoom to:
-      var landmass = {
-        "nausa": 1,
-        "saecu": 1,
-        "afsyc": 1,
-        "asmys": 2,
-        "eugbr": 2,
-        "asjpn": 4
-      }
-
-      if (landmass[id]) {
-
-        var areas = [], test = d3plus.util.copy(country);
-        country.geometry.coordinates.forEach(function(c, i){
-          test.geometry.coordinates = [c];
-          areas.push(path.area(test))
-        })
-
-        var sorted = areas.slice().sort(function(a, b){ return b-a; });
-        var maxArea = sorted[landmass[id] - 1];
-        country.geometry.coordinates = country.geometry.coordinates.filter(function(c, i){
-          return areas[i] >= maxArea;
-        });
+        projection.scale(40).translate([width/2, height/2]);
+        path = d3.geo.path().projection(projection);
 
       }
       else {
 
-        // Logic for removing small/far away geometries.
-        var test = d3plus.util.copy(country),
-            areas = [],
-            areaMax = 0,
-            distances = [],
-            center = path.centroid(country);
+        var rotate = rotate = ["eurus"].indexOf(id) >= 0 ? -155 : 0;
 
-        country.geometry.coordinates = country.geometry.coordinates.filter(function(c){
+        projection.scale(1).translate([0,0]).rotate([rotate,0]);
+        path = d3.geo.path().projection(projection);
 
-          test.geometry.coordinates = [c];
-          var area = path.area(test);
-          if (area > 0) {
-            areas.push(area);
-            if (area > areaMax) {
-              areaMax = area;
+        coords.objects[key].geometries = [];
+        geo_ids.forEach(function(g){
+          coords.objects[key].geometries.push(coords.objects[key].lookup[g]);
+        });
+
+        var country = topojson.feature(coords, coords.objects[key]).features[0];
+
+        // List of countries specifying how many landmasses to zoom to:
+        var landmass = {
+          "nausa": 1,
+          "saecu": 1,
+          "afsyc": 1,
+          "asmys": 2,
+          "eugbr": 2,
+          "asjpn": 4
+        }
+
+        if (landmass[id]) {
+
+          var areas = [], test = d3plus.util.copy(country);
+          country.geometry.coordinates.forEach(function(c, i){
+            test.geometry.coordinates = [c];
+            areas.push(path.area(test))
+          })
+
+          var sorted = areas.slice().sort(function(a, b){ return b-a; });
+          var maxArea = sorted[landmass[id] - 1];
+          country.geometry.coordinates = country.geometry.coordinates.filter(function(c, i){
+            return areas[i] >= maxArea;
+          });
+
+        }
+        else {
+
+          // Logic for removing small/far away geometries.
+          var test = d3plus.util.copy(country),
+              areas = [],
+              areaMax = 0,
+              distances = [],
+              center = path.centroid(country);
+
+          country.geometry.coordinates = country.geometry.coordinates.filter(function(c){
+
+            test.geometry.coordinates = [c];
+            var area = path.area(test);
+            if (area > 0) {
+              areas.push(area);
+              if (area > areaMax) {
+                areaMax = area;
+              }
+              distances.push(d3plus.network.distance(path.centroid(test), center))
+              return true;
             }
-            distances.push(d3plus.network.distance(path.centroid(test), center))
-            return true;
-          }
-          else {
-            return false;
-          }
+            else {
+              return false;
+            }
 
-        });
+          });
 
-        var distanceCutoff = d3.quantile(distances.reduce(function(arr, dist, i) {
-          if (dist) arr.push(areas[i]/dist);
-          return arr;
-        }, []), 0.9);
+          var distanceCutoff = d3.quantile(distances.reduce(function(arr, dist, i) {
+            if (dist) arr.push(areas[i]/dist);
+            return arr;
+          }, []), 0.9);
 
-        country.geometry.coordinates = country.geometry.coordinates.filter(function(c, i){
-          return distances[i] === 0 || areas[i]/distances[i] >= distanceCutoff;
-        });
+          country.geometry.coordinates = country.geometry.coordinates.filter(function(c, i){
+            return distances[i] === 0 || areas[i]/distances[i] >= distanceCutoff;
+          });
+
+        }
+
+        var b = path.bounds(country),
+            zoom = d3.min([(b[1][0] - b[0][0]) * 100, 0.9]),
+            s = zoom / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+            t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+
+        projection
+          .scale(s)
+          .translate(t);
 
       }
 
-      var b = path.bounds(country),
-          zoom = d3.min([(b[1][0] - b[0][0]) * 100, 0.9]),
-          s = zoom / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-          t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
-
       coords.objects[key].geometries = coords.objects[key].lookup.all;
+
       var countries = topojson.feature(coords, coords.objects[key]);
 
-      projection
-        .scale(s)
-        .translate(t);
-
-      var scale = 0.5;
+      // var scale = 0.5;
       var group = svg.append("g")
+        .attr("id", "topojson-" + id)
         // .attr("transform", "translate("+(width*(scale/2))+","+(height*(scale/2))+")scale("+scale+","+scale+")");
 
       group.selectAll("path").data(countries.features)
@@ -419,7 +485,7 @@
         .attr("d", path)
         .attr("class", "coords")
         .classed("focus", function(d){
-          return geo_ids.indexOf(d.id) >= 0 ? true : false;
+          return id === "xxwld" || geo_ids.indexOf(d.id) >= 0 ? true : false;
         });
 
       map.classed("loaded", true);
@@ -456,6 +522,7 @@
     builds.forEach(function(b, i){
       var w = d3.select(b.container.node().parentNode).node().offsetWidth;
       var height = b.data && b.data.viz.slug === "network" ? window.innerWidth > 768 ? w * 0.7 : w : h * 0.9;
+      height = height > 600 ? 600 : height;
       b.container.style("height", height + "px");
       b.top = b.container.node().offsetTop;
       if (w !== b.width || h !== b.height) {

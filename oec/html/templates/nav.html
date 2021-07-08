@@ -2,6 +2,9 @@
 {% extends "templates/base.html" %}
 
 {% block content %}
+<div class="header-banner">
+  <div id="header-banner-content"><p>Looking for the latest data? Try <a href="https://oec.world">OEC Pro</a></p></div>
+</div>
 
 <div id="mobileNav">
 
@@ -46,9 +49,11 @@
   </div>
 
   <footer>
-    <a id="mc" href="http://macroconnections.media.mit.edu/" target="_blank">
-      <img src="/static/img/nav/mc.png">
-    </a>
+    <div class="top-footer">
+      <div class="top-footer-links">
+
+      </div>
+    </div>
 
     <div>
       <ul class="lang">
@@ -423,6 +428,9 @@
   function filterData(a, q) {
     if (q.length) {
       return attrs[a].filter(function(d){
+        if(!d.name) {
+          return false;
+        }
         return d.name.toLowerCase().indexOf(q) >= 0 ||
                d.id.indexOf(q) === 0 ||
                (d.display_id && d.display_id.indexOf(q) === 0) ||
